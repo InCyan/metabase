@@ -16,10 +16,9 @@
             [metabase.models.collection :as collection :refer [Collection]]
             [metabase.models.dashboard :refer [Dashboard]]
             [metabase.models.dashboard-card :refer [DashboardCard]]
-            [metabase.models.database :refer [Database]]
             [metabase.models.field :refer [Field]]
             [metabase.models.humanization :as humanization]
-            [metabase.models.permissions :as perms :refer [Permissions]]
+            [metabase.models.permissions :as perms]
             [metabase.models.permissions-group :as perm-group :refer [PermissionsGroup]]
             [metabase.models.pulse :refer [Pulse]]
             [metabase.models.setting :as setting :refer [Setting]]
@@ -32,9 +31,9 @@
 
 ;;; # Migration Helpers
 
-(models/defmodel DataMigrations :data_migrations)
+(models/defmodel ^:deprecated DataMigrations :data_migrations)
 
-(defn- run-migration-if-needed!
+(defn- ^:deprecated run-migration-if-needed!
   "Run migration defined by `migration-var` if needed. `ran-migrations` is a set of migrations names that have already
   been run.
 
@@ -58,14 +57,14 @@
 
 (def ^:private data-migrations (atom []))
 
-(defmacro ^:private defmigration
+(defmacro ^:private ^:deprecated defmigration
   "Define a new data migration. This is just a simple wrapper around `defn-` that adds the resulting var to that
   `data-migrations` atom."
   [migration-name & body]
   `(do (defn- ~migration-name [] ~@body)
        (swap! data-migrations conj #'~migration-name)))
 
-(defn run-all!
+(defn ^:deprecated run-all!
   "Run all data migrations defined by `defmigration`."
   []
   (log/info "Running all necessary data migrations, this may take a minute.")
@@ -73,23 +72,6 @@
     (doseq [migration @data-migrations]
       (run-migration-if-needed! ran-migrations migration)))
   (log/info "Finished running data migrations."))
-
-
-;;; +----------------------------------------------------------------------------------------------------------------+
-;;; |                                                 PERMISSIONS v1                                                 |
-;;; +----------------------------------------------------------------------------------------------------------------+
-
-;; add existing databases to default permissions groups. default and metabot groups have entries for each individual
-;; DB
-(defmigration ^{:author "camsaul", :added "0.20.0"} add-databases-to-magic-permissions-groups
-  (let [db-ids (db/select-ids Database)]
-    (doseq [{group-id :id} [(perm-group/all-users)
-                            (perm-group/metabot)]
-            database-id    db-ids]
-      (u/ignore-exceptions
-        (db/insert! Permissions
-          :object   (perms/data-perms-path database-id)
-          :group_id group-id)))))
 
 ;; Copy the value of the old setting `-site-url` to the new `site-url` if applicable.  (`site-url` used to be stored
 ;; internally as `-site-url`; this was confusing, see #4188 for details) This has the side effect of making sure the
