@@ -28,8 +28,7 @@
             [metabase.util :as u]
             [metabase.util.i18n :refer [trs]]
             [toucan.db :as db]
-            [toucan.models :as models])
-  (:import java.util.UUID))
+            [toucan.models :as models]))
 
 ;;; # Migration Helpers
 
@@ -79,15 +78,6 @@
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                                 PERMISSIONS v1                                                 |
 ;;; +----------------------------------------------------------------------------------------------------------------+
-
-;; admin group has a single entry that lets it access to everything
-(defmigration ^{:author "camsaul", :added "0.20.0"} add-admin-group-root-entry
-  (binding [perms/*allow-admin-permissions-changes* true
-            perms/*allow-root-entries* true]
-    (u/ignore-exceptions
-      (db/insert! Permissions
-        :group_id (:id (perm-group/admin))
-        :object   "/"))))
 
 ;; add existing databases to default permissions groups. default and metabot groups have entries for each individual
 ;; DB
@@ -161,7 +151,7 @@
 (defmigration ^{:author "senior", :added "0.30.0"} clear-ldap-user-local-passwords
   (db/transaction
     (doseq [user (db/select [User :id :password_salt] :ldap_auth [:= true])]
-      (db/update! User (u/the-id user) :password (creds/hash-bcrypt (str (:password_salt user) (UUID/randomUUID)))))))
+      (db/update! User (u/the-id user) :password (creds/hash-bcrypt (str (:password_salt user) (java.util.UUID/randomUUID)))))))
 
 
 ;; In 0.30 dashboards and pulses will be saved in collections rather than on separate list pages. Additionally, there
