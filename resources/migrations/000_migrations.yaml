@@ -9907,6 +9907,93 @@ databaseChangeLog:
         - sql:
             sql: UPDATE metabase_database SET engine = 'bigquery-cloud-sdk' WHERE engine = 'bigquery'
 
+  #
+  # The next few migrations replace metabase.db.data-migrations/add-users-to-default-permissions-groups from 0.20.0
+  #
+
+  # Create the magic Permissions Groups if they don't already exist.
+
+  # [add-users-to-default-permissions-groups 1 of 4]
+  - changeSet:
+      id: v43.00-002
+      author: camsaul
+      comment: >-
+        Added 0.43.0. Create magic 'All Users' Permissions Group if it does not already exist.
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: >-
+              SELECT count(*) FROM permissions_group WHERE name = 'All Users';
+      changes:
+        - sql:
+            sql: >-
+              INSERT INTO permissions_group (name)
+              VALUES
+              ('All Users')
+
+  # [add-users-to-default-permissions-groups 2 of 4]
+  - changeSet:
+      id: v43.00-003
+      author: camsaul
+      comment: >-
+        Added 0.43.0. Create magic 'Administrators' Permissions Group if it does not already exist.
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: >-
+              SELECT count(*) FROM permissions_group WHERE name = 'Administrators';
+      changes:
+        - sql:
+            sql: >-
+              INSERT INTO permissions_group (name)
+              VALUES
+              ('Administrators')
+
+  # Add existing Users to the magic Permissions Groups if needed.
+
+  # [add-users-to-default-permissions-groups 3 of 4]
+  - changeSet:
+      id: v43.00-004
+      author: camsaul
+      comment: >-
+        Added 0.43.0. Add existing Users to 'All Users' magic Permissions Group if needed.
+      changes:
+        - sql:
+            sql: >-
+              INSERT INTO permissions_group_membership (user_id)
+              SELECT id AS user_id
+              FROM core_user
+              WHERE id NOT IN (
+                SELECT user_id
+                FROM permissions_group_membership pgm
+                LEFT JOIN permissions_group pg
+                  ON pgm.group_id = pg.id
+                WHERE pgm.name = 'All Users'
+              );
+
+  # [add-users-to-default-permissions-groups 4 of 4]
+  - changeSet:
+      id: v43.00-005
+      author: camsaul
+      comment: >-
+        Added 0.43.0. Add existing Users with 'is_superuser' flag to 'Administrators' magic Permissions Group if needed.
+      changes:
+        - sql:
+            sql: >-
+              INSERT INTO permissions_group_membership (user_id)
+              SELECT id AS user_id
+              FROM core_user
+              WHERE is_superuser = true
+              AND id NOT IN (
+                SELECT user_id
+                FROM permissions_group_membership pgm
+                LEFT JOIN permissions_group pg
+                  ON pgm.group_id = pg.id
+                WHERE pgm.name = 'Administrators'
+              );
+
 # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
 
 ########################################################################################################################
