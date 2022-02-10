@@ -25,8 +25,7 @@
      (schema-migrations-test.impl/run-migrations-in-range! conn# [0 "v99.00-000"]) ; this should catch all migrations)
      ;; since the actual group defs are not dynamic, we need with-redefs to change them here
      (with-redefs [group/all-users (#'group/magic-group group/all-users-group-name)
-                   group/admin     (#'group/magic-group group/admin-group-name)
-                   group/metabot   (#'group/magic-group group/metabot-group-name)]
+                   group/admin     (#'group/magic-group group/admin-group-name)]
        ~@body)))
 
 (t/deftest no-collections-test
