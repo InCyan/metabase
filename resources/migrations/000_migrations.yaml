@@ -9970,7 +9970,7 @@ databaseChangeLog:
                 FROM permissions_group_membership pgm
                 LEFT JOIN permissions_group pg
                   ON pgm.group_id = pg.id
-                WHERE pgm.name = 'All Users'
+                WHERE pg.name = 'All Users'
               );
 
   # [add-users-to-default-permissions-groups 4 of 4]
@@ -9991,7 +9991,7 @@ databaseChangeLog:
                 FROM permissions_group_membership pgm
                 LEFT JOIN permissions_group pg
                   ON pgm.group_id = pg.id
-                WHERE pgm.name = 'Administrators'
+                WHERE pg.name = 'Administrators'
               );
 
 # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
