@@ -20,7 +20,7 @@ describe("scenarios > admin > permissions", () => {
     cy.visit("/admin/datamodel/database/1");
     cy.icon("eye_crossed_out")
       .eq(0)
-      .click();
+      .realHover();
 
     cy.visit("admin/permissions/data/group/1/database/1");
 
@@ -635,7 +635,7 @@ function modifyPermission(
 ) {
   getPermissionRowPermissions(item)
     .eq(permissionIndex)
-    .click();
+    .realHover();
 
   popover().within(() => {
     if (shouldPropagate !== null) {

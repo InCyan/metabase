@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, forwardRef } from "react";
 import PropTypes from "prop-types";
 import * as TippyReact from "@tippyjs/react";
 import * as tippy from "tippy.js";
@@ -49,53 +49,61 @@ const hideOnEscPlugin = {
   },
 };
 
-function TippyPopover({
-  className,
-  disableContentSandbox,
-  content,
-  delay,
-  lazy = true,
-  ...props
-}: ITippyPopoverProps) {
-  delay = isCypressActive ? 0 : delay;
-  const animationDuration = isReducedMotionPreferred() ? 0 : undefined;
-  const [mounted, setMounted] = useState(!lazy);
-  const shouldShowContent = mounted && content != null;
+const TippyPopover = forwardRef<Element, ITippyPopoverProps>(
+  function TippyPopover(
+    {
+      className,
+      disableContentSandbox,
+      content,
+      delay,
+      lazy = true,
+      ...props
+    }: ITippyPopoverProps,
+    ref,
+  ) {
+    delay = isCypressActive ? 0 : delay;
+    const animationDuration = isReducedMotionPreferred() ? 0 : undefined;
+    const [mounted, setMounted] = useState(!lazy);
+    const shouldShowContent = mounted && content != null;
 
-  const lazyPlugin = useMemo(
-    () => ({
-      name: "lazy",
-      fn: () => ({
-        onMount: () => setMounted(true),
-        onHidden: () => setMounted(!lazy),
+    const lazyPlugin = useMemo(
+      () => ({
+        name: "lazy",
+        fn: () => ({
+          onMount: () => setMounted(true),
+          onHidden: () => setMounted(!lazy),
+        }),
       }),
-    }),
-    [lazy],
-  );
+      [lazy],
+    );
 
-  const plugins = useMemo(() => [lazyPlugin, hideOnEscPlugin], [lazyPlugin]);
+    const plugins = useMemo(() => [lazyPlugin, hideOnEscPlugin], [lazyPlugin]);
 
-  return (
-    <TippyComponent
-      className={cx("popover", className)}
-      theme="popover"
-      arrow={false}
-      offset={OFFSET}
-      appendTo={appendTo}
-      plugins={plugins}
-      {...props}
-      duration={animationDuration}
-      delay={delay}
-      content={
-        shouldShowContent ? (
-          <EventSandbox disabled={disableContentSandbox}>
-            {content}
-          </EventSandbox>
-        ) : null
-      }
-    />
-  );
-}
+    return (
+      <TippyComponent
+        ref={ref}
+        className={cx("popover", className)}
+        theme="popover"
+        arrow={false}
+        offset={OFFSET}
+        appendTo={appendTo}
+        plugins={plugins}
+        {...props}
+        duration={animationDuration}
+        delay={delay}
+        content={
+          shouldShowContent ? (
+            <EventSandbox disabled={disableContentSandbox}>
+              {content}
+            </EventSandbox>
+          ) : null
+        }
+      />
+    );
+  },
+);
+
+TippyPopover.displayName = "TippyPopover";
 
 TippyPopover.propTypes = propTypes;
 

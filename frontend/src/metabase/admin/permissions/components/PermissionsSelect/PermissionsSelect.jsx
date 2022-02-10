@@ -1,11 +1,10 @@
-import React, { useState, memo } from "react";
+import React, { useState, memo, useRef } from "react";
 import PropTypes from "prop-types";
 
-import PopoverWithTrigger from "metabase/components/PopoverWithTrigger";
-import { lighten } from "metabase/lib/colors";
-import Icon from "metabase/components/Icon";
 import Toggle from "metabase/core/components/Toggle";
 import Tooltip from "metabase/components/Tooltip";
+
+import TippyPopover from "metabase/components/Popover/TippyPopover";
 
 import {
   PermissionsSelectOption,
@@ -48,6 +47,7 @@ export const PermissionsSelect = memo(function PermissionsSelect({
   warning,
   isHighlighted,
 }) {
+  const tippyRef = useRef();
   const [toggleState, setToggleState] = useState(false);
   const selectedOption = options.find(option => option.value === value);
   const selectableOptions = options.filter(option => option !== selectedOption);
@@ -74,13 +74,6 @@ export const PermissionsSelect = memo(function PermissionsSelect({
           <WarningIcon />
         </Tooltip>
       )}
-
-      <Icon
-        style={{ visibility: isDisabled ? "hidden" : "visible" }}
-        name="chevrondown"
-        size={16}
-        color={lighten("text-light", 0.15)}
-      />
     </PermissionsSelectRoot>
   );
 
@@ -88,13 +81,11 @@ export const PermissionsSelect = memo(function PermissionsSelect({
   const hasActions = actionsForCurrentValue.length > 0;
 
   return (
-    <PopoverWithTrigger
+    <TippyPopover
+      ref={tippyRef}
       disabled={isDisabled}
-      triggerElement={selectedOptionValue}
-      targetOffsetX={16}
-      targetOffsetY={8}
-    >
-      {({ onClose }) => (
+      offset={[-16, 0]}
+      content={
         <React.Fragment>
           <OptionsList role="listbox">
             {selectableOptions.map(option => (
@@ -102,8 +93,8 @@ export const PermissionsSelect = memo(function PermissionsSelect({
                 role="option"
                 key={option.value}
                 onClick={() => {
-                  onClose();
                   onChange(option.value, toggleLabel ? toggleState : null);
+                  tippyRef.current?._tippy?.hide();
                 }}
               >
                 <PermissionsSelectOption {...option} />
@@ -117,8 +108,8 @@ export const PermissionsSelect = memo(function PermissionsSelect({
                   key={index}
                   role="option"
                   onClick={() => {
-                    onClose();
                     onAction(action);
+                    tippyRef.current?._tippy?.hide();
                   }}
                 >
                   <PermissionsSelectOption {...action} />
@@ -134,8 +125,12 @@ export const PermissionsSelect = memo(function PermissionsSelect({
             </ToggleContainer>
           )}
         </React.Fragment>
-      )}
-    </PopoverWithTrigger>
+      }
+      interactive
+      placement="bottom-start"
+    >
+      {selectedOptionValue}
+    </TippyPopover>
   );
 });
 

@@ -3,11 +3,7 @@ import styled from "@emotion/styled";
 import { color, alpha, lighten } from "metabase/lib/colors";
 import Link from "metabase/core/components/Link";
 import Icon from "metabase/components/Icon";
-
-const HORIZONTAL_PADDING_VARIANTS = {
-  sm: "0.5rem",
-  lg: "3rem",
-};
+import Label from "metabase/components/type/Label";
 
 export const PermissionsTableRoot = styled.table`
   border-collapse: collapse;
@@ -19,14 +15,18 @@ export const PermissionsTableRow = styled.tr`
 `;
 
 export const PermissionsTableCell = styled.td`
-  padding: 0.5rem 1rem;
+  height: 40px
   width: auto;
   min-width: 220px;
+  vertical-align: center;
 
   &:first-of-type {
+    padding: 0.625rem;
+    background: white;
+    left: 0;
+    position: sticky;
     max-width: 340px;
-    padding: 0.5rem
-      ${props => HORIZONTAL_PADDING_VARIANTS[props.horizontalPadding]};
+    padding-left: 0;
   }
 `;
 
@@ -52,6 +52,10 @@ export const HintIcon = styled(Icon)`
   color: ${lighten("text-dark", 0.3)};
   margin-left: 0.375rem;
   cursor: pointer;
+`;
+
+export const ColumnName = styled(Label)`
+  margin: 0;
 `;
 
 HintIcon.defaultProps = {

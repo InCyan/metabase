@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 
-import Label from "metabase/components/type/Label";
 import Tooltip from "metabase/components/Tooltip";
 import Modal from "metabase/components/Modal";
 import ConfirmContent from "metabase/components/ConfirmContent";
@@ -15,6 +14,7 @@ import {
   EntityNameLink,
   EntityName,
   HintIcon,
+  ColumnName,
 } from "./PermissionsTable.styled";
 
 const propTypes = {
@@ -72,17 +72,18 @@ export function PermissionsTable({
   const hasItems = entities.length > 0;
 
   return (
-    <React.Fragment>
+    <>
       <PermissionsTableRoot data-testid="permission-table">
         <thead>
           <tr>
             {columns.map(column => {
               return (
                 <PermissionsTableCell
+                  as="th"
                   key={column}
                   horizontalPadding={horizontalPadding}
                 >
-                  <Label>{column}</Label>
+                  <ColumnName>{column}</ColumnName>
                 </PermissionsTableCell>
               );
             })}
@@ -145,7 +146,7 @@ export function PermissionsTable({
           />
         </Modal>
       )}
-    </React.Fragment>
+    </>
   );
 }
 
