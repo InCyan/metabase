@@ -9965,7 +9965,7 @@ databaseChangeLog:
               INSERT INTO permissions_group_membership (user_id, group_id)
               SELECT
                 u.id AS user_id,
-                admin_group.id AS group_id
+                all_users_group.id AS group_id
                 FROM core_user u
                 LEFT JOIN (
                   SELECT *
