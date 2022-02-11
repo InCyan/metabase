@@ -9962,16 +9962,21 @@ databaseChangeLog:
       changes:
         - sql:
             sql: >-
-              INSERT INTO permissions_group_membership (user_id)
-              SELECT id AS user_id
-              FROM core_user
-              WHERE id NOT IN (
-                SELECT user_id
-                FROM permissions_group_membership pgm
-                LEFT JOIN permissions_group pg
-                  ON pgm.group_id = pg.id
-                WHERE pg.name = 'All Users'
-              );
+              INSERT INTO permissions_group_membership (user_id, group_id)
+              SELECT
+                u.id AS user_id,
+                admin_group.id AS group_id
+                FROM core_user u
+                LEFT JOIN (
+                  SELECT *
+                  FROM permissions_group
+                  WHERE name = 'All Users'
+                ) all_users_group
+                  ON true
+                LEFT JOIN permissions_group_membership pgm
+                       ON u.id = pgm.user_id
+                      AND all_users_group.id = pgm.group_id
+                WHERE pgm.id IS NULL;
 
   # [add-users-to-default-permissions-groups 4 of 4]
   - changeSet:
@@ -9982,17 +9987,22 @@ databaseChangeLog:
       changes:
         - sql:
             sql: >-
-              INSERT INTO permissions_group_membership (user_id)
-              SELECT id AS user_id
-              FROM core_user
-              WHERE is_superuser = true
-              AND id NOT IN (
-                SELECT user_id
-                FROM permissions_group_membership pgm
-                LEFT JOIN permissions_group pg
-                  ON pgm.group_id = pg.id
-                WHERE pg.name = 'Administrators'
-              );
+              INSERT INTO permissions_group_membership (user_id, group_id)
+              SELECT
+                u.id AS user_id,
+                admin_group.id AS group_id
+                FROM core_user u
+                LEFT JOIN (
+                  SELECT *
+                  FROM permissions_group
+                  WHERE name = 'Administrators'
+                ) admin_group
+                  ON true
+                LEFT JOIN permissions_group_membership pgm
+                       ON u.id = pgm.user_id
+                      AND admin_group.id = pgm.group_id
+                WHERE u.is_superuser = true
+                  AND pgm.id IS NULL;
 
 # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
 
