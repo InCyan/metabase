@@ -119,6 +119,16 @@
     (= api/*current-user-id* (:creator_id notification))
     (i/current-user-has-full-permissions? :write notification)))
 
+(defn- can-read?
+  "A user with read-only permissions for a dashboard should be able to view subscriptions
+  subscriptions that they created, but not view anyone else's subscriptions."
+  [notification]
+  (if (and (is-dashboard-subscription? notification)
+            (i/current-user-has-full-permissions? :read notification)
+            (not (i/current-user-has-full-permissions? :write notification)))
+    (= api/*current-user-id* (:creator_id notification))
+    (i/current-user-has-full-permissions? :write notification)))
+
 (u/strict-extend (class Pulse)
   models/IModel
   (merge
@@ -131,7 +141,7 @@
   i/IObjectPermissions
   (merge
    i/IObjectPermissionsDefaults
-   {:can-read?         (partial i/current-user-has-full-permissions? :read)
+   {:can-read?         can-read?
     :can-write?        can-write?
     :perms-objects-set perms-objects-set}))
 
