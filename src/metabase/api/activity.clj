@@ -4,6 +4,7 @@
             [medley.core :as m]
             [metabase.api.common :refer [*current-user-id* defendpoint define-routes]]
             [metabase.models.activity :refer [Activity]]
+            [metabase.api.common :as api]
             [metabase.models.card :refer [Card]]
             [metabase.models.dashboard :refer [Dashboard]]
             [metabase.models.interface :as mi]
@@ -82,7 +83,7 @@
 (defendpoint GET "/"
   "Get recent activity."
   []
-  (filter mi/can-read? (-> (db/select Activity, {:order-by [[:timestamp :desc]], :limit 40})
+  (filter mi/can-read? (-> (db/select Activity, {:where [:= :user_id api/*current-user-id*]  :order-by [[:timestamp :desc]], :limit 40})
                            (hydrate :user :table :database)
                            add-model-exists-info)))
 
