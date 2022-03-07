@@ -321,7 +321,7 @@
                :from      [[Pulse :p]]
                :left-join (concat
                            [[:report_dashboard :d] [:= :p.dashboard_id :d.id]]
-                           (when api/*current-user-id*
+                           (when user-id
                              [[PulseChannel :pchan] [:= :p.id :pchan.pulse_id]
                               [PulseChannelRecipient :pcr] [:= :pchan.id :pcr.pulse_channel_id]]))
                :where     [:and
@@ -332,12 +332,12 @@
                             [:= :d.archived false]]
                            (when dashboard-id
                              [:= :p.dashboard_id dashboard-id])
-                           (when api/*current-user-id*
+                           (when user-id
                              [:and
-                              [:not= :p.dashboard_id nil] 
+                              [:not= :p.dashboard_id nil]
                               [:or
-                               [:= :p.creator_id api/*current-user-id*]
-                               [:= :pcr.user_id api/*current-user-id*]]])]
+                               [:= :p.creator_id user-id]
+                               [:= :pcr.user_id user-id]]])]
                :order-by  [[:lower-name :asc]]}]
     (for [pulse (query-as Pulse query)]
       (-> pulse
