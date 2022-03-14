@@ -2,9 +2,11 @@
   "Middleware that adds default constraints to limit the maximum number of rows returned to queries that specify the
   `:add-default-userland-constraints?` `:middleware` option.")
 
+;; this affects several tests in yarn test-unit
+;; TODO fix if merging with open source
 (def ^:private max-results-bare-rows
   "Maximum number of rows to return specifically on :rows type queries via the API."
-  2000)
+  10000)
 
 (def ^:private max-results
   "General maximum number of rows to return from an API query."
