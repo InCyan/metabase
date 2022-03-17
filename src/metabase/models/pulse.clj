@@ -123,7 +123,7 @@
   "A segmented user should be able to view subscriptions that they created, but not view anyone else's subscriptions."
   [notification]
   (if (resolve 'metabase-enterprise.sandbox.api.util/segmented-user?)
-    (= api/*current-user-id* (:creator_id notification))
+    (and (i/current-user-has-full-permissions? :read notification) (= api/*current-user-id* (:creator_id notification)))
     (i/current-user-has-full-permissions? :read notification)))
 
 (u/strict-extend (class Pulse)
