@@ -119,6 +119,14 @@
     (= api/*current-user-id* (:creator_id notification))
     (i/current-user-has-full-permissions? :write notification)))
 
+(defn- can-read?
+  "A segmented user should be able to view subscriptions that they created, but not view anyone else's subscriptions."
+  [notification]
+  (if (and (resolve 'metabase-enterprise.sandbox.api.util/segmented-user?)
+           (i/current-user-has-full-permissions? :read notification))
+      (= api/*current-user-id* (:creator_id notification))
+      (i/current-user-has-full-permissions? :read notification)))
+
 (u/strict-extend (class Pulse)
   models/IModel
   (merge
@@ -131,7 +139,7 @@
   i/IObjectPermissions
   (merge
    i/IObjectPermissionsDefaults
-   {:can-read?         (partial i/current-user-has-full-permissions? :read)
+   {:can-read?         can-read?
     :can-write?        can-write?
     :perms-objects-set perms-objects-set}))
 
@@ -304,14 +312,14 @@
 
 (s/defn retrieve-pulses :- [PulseInstance]
   "Fetch all `Pulses`."
-  [{:keys [archived? dashboard-id user-id is-superuser]
+  [{:keys [archived? dashboard-id user-id]
     :or   {archived? false}}]
   (let [query {:select    [:p.* [:%lower.p.name :lower-name]]
                :modifiers [:distinct]
                :from      [[Pulse :p]]
                :left-join (concat
                            [[:report_dashboard :d] [:= :p.dashboard_id :d.id]]
-                           (when-not is-superuser
+                           (when user-id
                              [[PulseChannel :pchan] [:= :p.id :pchan.pulse_id]
                               [PulseChannelRecipient :pcr] [:= :pchan.id :pcr.pulse_channel_id]]))
                :where     [:and
@@ -322,9 +330,9 @@
                             [:= :d.archived false]]
                            (when dashboard-id
                              [:= :p.dashboard_id dashboard-id])
-                           (when-not is-superuser
+                           (when user-id
                              [:and
-                              [:not= :p.dashboard_id nil] 
+                              [:not= :p.dashboard_id nil]
                               [:or
                                [:= :p.creator_id user-id]
                                [:= :pcr.user_id user-id]]])]
