@@ -122,7 +122,7 @@
 (defn- can-read?
   "A segmented user should be able to view subscriptions that they created, but not view anyone else's subscriptions."
   [notification]
-  (if (and (resolve 'metabase-enterprise.sandbox.api.util/segmented-user?)
+  (if (and ((resolve 'metabase-enterprise.sandbox.api.util/segmented-user?))
            (i/current-user-has-full-permissions? :read notification))
       (= api/*current-user-id* (:creator_id notification))
       (i/current-user-has-full-permissions? :read notification)))
