@@ -6,7 +6,7 @@
 ;; TODO fix if merging with open source
 (def ^:private max-results-bare-rows
   "Maximum number of rows to return specifically on :rows type queries via the API."
-  10000)
+  15000)
 
 (def ^:private max-results
   "General maximum number of rows to return from an API query."
